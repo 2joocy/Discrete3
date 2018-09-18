@@ -1,81 +1,67 @@
+import ComplimentSet from './sets/ComplimentSet'
+import DifferenceSet from './sets/DifferenceSet'
+import IntersectionSet from './sets/IntersectionSet'
+import UnionSet from './sets/UnionSet'
+
 export default class OperationHandler{
 
-    constructor(){
-
-    }
-
-    public membership(a: any, set: any[]): boolean{
-        let answer: boolean = false;
-        switch(typeof(a)){
-            case "number": 
-                if(set.indexOf(a) >= 0){
-                    answer = true;
-                }
-                break;
-            case "object": 
-                // TODO: arrEquals is wrong.
-                // a could be an array, in which case we need to check the set if one of the elements is an array
-                set.forEach((item, index) => {
-                    if(typeof(item) === "object"){
-                        answer = true;
-                    }
-                });
-                break;
-        }
-        return answer;
+    public membership(a: number, set: number[]): boolean{
+        return set.indexOf(a) !== -1;
     }
     
-    public intersection(aArr: number[], bArr: number[]): number[]{
+    public intersection(aArr: number[], bArr: number[]): IntersectionSet{
         let temp: number[] = [];
         aArr.forEach((a, indexA) => {
             if(bArr.indexOf(a) >= 0){
                 temp.push(a);
             }
         });
-        return temp;
+        let intersectionSet = new IntersectionSet(aArr, bArr, temp);
+        return intersectionSet;
     }
 
-    public union(aArr: number[], bArr: number[]): number[]{
+    public union(aArr: number[], bArr: number[]): UnionSet{
         let temp: number[] = [];
         temp.concat(aArr, bArr);
         temp = temp.sort(function (a, b) {  return a - b;  });
-        return temp;
+        let unionSet = new UnionSet(aArr, bArr, temp);
+        return unionSet;
     }
 
-    public difference(aArr: number[], bArr: number[]): number[]{
+    public difference(aArr: number[], bArr: number[]): DifferenceSet{
         let occurrences = new Map<number, number>(); 
         let result: number[] = [];
         aArr.forEach((itemA, indexA) => {
-            if(occurrences.get(itemA) === undefined){
-                occurrences.set(itemA, 1);
-            }
-            // @ts-ignore
-            occurrences.set(itemA, occurrences.get(itemA) + 1);
+            occurrences.set(itemA, 1);
         });
         bArr.forEach((itemB, indexB) => {
-            if(occurrences.get(itemB) === undefined){
+            let occurrenceB = occurrences.get(itemB);
+            if(occurrenceB === undefined){
                 occurrences.set(itemB, 1);
-            }
-            // @ts-ignore
-            occurrences.set(itemB, occurrences.get(itemB) + 1);
-        });
-        occurrences.forEach((item, index) => {
-            if(item > 1){
-                result.push(item);
+            }else{
+                occurrences.set(itemB, occurrenceB + 1);
             }
         });
-        
-        return result;
+        occurrences.forEach((item: number, key: number, ) => {
+            if(item === 1){
+                result.push(key);
+            }
+        });
+
+        let differenceSet = new DifferenceSet(aArr, bArr, result);
+        return differenceSet;
     }
 
-    public complement(arr: any[]): any[]{
+    public complement(arr: number[]): ComplimentSet{
         let result: any[] = [];
         arr.forEach((item, index) => {
             result.push("...")
             result.push(item);
         });
+        // @ts-ignore
         result.push("...");
-        return result;
+        let complimentSet = new ComplimentSet(arr, result);
+        return complimentSet;
 
     }
 
